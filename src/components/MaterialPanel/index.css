@@ -1,0 +1,19 @@
+.editor-left-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 150px;
+    background-color: #f5f5f5;
+    margin-bottom: 24px;
+    position: relative;
+
+    span {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: #b1d9dc;
+        color: #fff;
+        padding: 6px;
+    }
+}

@@ -1,8 +1,13 @@
-interface IComponent {
+import { CSSProperties } from 'react';
+
+export interface IComponent {
     label: string;
     preview: () => JSX.Element | string;
     render: () => JSX.Element | string;
     type: string;
+    style?: CSSProperties;
+    alignCenter?: boolean;
+    focus?: boolean;
 }
 
 const createEditorConfig = () => {

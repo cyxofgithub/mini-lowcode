@@ -1,4 +1,8 @@
-import './index.less';
+import './index.css';
+import React, { useEffect } from 'react';
+import { GlobalContext } from '../../store';
+import { Block } from './Block';
+import { IComponent } from '../MaterialPanel/registerConfig';
 
 //私有常量
 
@@ -13,6 +17,7 @@ import './index.less';
 
 let CanvasArea = (_props: IProps) => {
     //变量声明、解构
+    const { currentMaterial, setCurrentMaterial, setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
 
     //组件状态
 
@@ -21,10 +26,71 @@ let CanvasArea = (_props: IProps) => {
     //数据转换
 
     //逻辑处理函数
+    const handleDragEnter = (event: { dataTransfer: { dropEffect: string } }) =>
+        (event.dataTransfer.dropEffect = 'move');
+
+    const handleDragOver = (event: { preventDefault: () => any }) => event.preventDefault();
+
+    const handleDragLeave = (event: { dataTransfer: { dropEffect: string } }) =>
+        (event.dataTransfer.dropEffect = 'none');
+
+    const handleDrop = (event: any) => {
+        const { offsetX, offsetY } = event.nativeEvent;
+        const config = {
+            type: currentMaterial?.type,
+            alignCenter: true, // 表示拖拽到画布后，基于鼠标位置居中展示
+            focus: false,
+            style: {
+                width: undefined,
+                height: undefined,
+                left: offsetX,
+                top: offsetY,
+                zIndex: 1,
+            },
+        };
+        currentSchema.blocks.push(config);
+        setCurrentSchema({ ...currentSchema });
+        setCurrentMaterial(null);
+    };
+
+    const cleanBlocksFocus = (refresh?: boolean) => {
+        currentSchema.blocks.forEach((block: IComponent) => (block.focus = false));
+        refresh && setCurrentSchema({ ...currentSchema });
+    };
+
+    const handleMouseDown = (
+        e: { preventDefault: () => void; stopPropagation: () => void },
+        block: IComponent,
+        index: number
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        cleanBlocksFocus();
+        currentSchema.blocks[index].focus = true;
+
+        setCurrentSchema({ ...currentSchema });
+    };
 
     //组件Effect
+    useEffect(() => {
+        console.log(currentSchema);
+    }, [currentSchema]);
 
-    return <div id="canvas-container">编辑区 - 画布</div>;
+    return (
+        <div
+            id="canvas-container"
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            style={{ ...currentSchema.container }}
+        >
+            {currentSchema.blocks.map((block: IComponent, index: number) => (
+                <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, block, index)} />
+            ))}
+        </div>
+    );
 };
 
 //props类型定义

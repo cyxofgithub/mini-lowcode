@@ -1,5 +1,7 @@
-import './index.less';
-import registerConfig from '../CanvasArea/utils/registerConfig';
+import './index.css';
+import registerConfig, { IComponent } from './registerConfig';
+import { GlobalContext } from '../../store';
+import React from 'react';
 
 //私有常量
 
@@ -14,6 +16,7 @@ import registerConfig from '../CanvasArea/utils/registerConfig';
 
 let MaterialPanel = (_props: IProps) => {
     //变量声明、解构
+    const { setCurrentMaterial } = React.useContext(GlobalContext);
 
     //组件状态
 
@@ -22,6 +25,9 @@ let MaterialPanel = (_props: IProps) => {
     //数据转换
 
     //逻辑处理函数
+    const handleDragStart = (component: IComponent) => {
+        setCurrentMaterial(component);
+    };
 
     //组件Effect
 
@@ -30,7 +36,9 @@ let MaterialPanel = (_props: IProps) => {
             {registerConfig.componentList.map(component => (
                 <div key={component.type} className="editor-left-item">
                     <span>{component.label}</span>
-                    <div>{component.preview()}</div>
+                    <div draggable onDragStart={() => handleDragStart(component)}>
+                        {component.preview()}
+                    </div>
                 </div>
             ))}
         </div>

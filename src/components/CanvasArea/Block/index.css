@@ -1,0 +1,9 @@
+.editor-block {
+    position: absolute;
+}
+
+.editor-block-focus {
+    user-select: none;
+
+    border: 1px solid #1890ff;
+}

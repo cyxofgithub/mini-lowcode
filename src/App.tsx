@@ -1,26 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { CanvasArea } from './components/CanvasArea';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <div className="editor-wrapper">
+            <div className="editor-header">顶部工具栏</div>
+            <div className="editor-main">
+                <div className="editor-left">左侧物料区</div>
+                <div className="editor-container">
+                    <CanvasArea />
+                </div>
+                <div className="editor-right">右侧属性区</div>
+            </div>
+        </div>
+    );
 }
 
 export default App;

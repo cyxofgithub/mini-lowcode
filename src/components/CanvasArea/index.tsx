@@ -1,5 +1,5 @@
 import './index.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { GlobalContext } from '../../store';
 import { Block } from './Block';
 import { IComponent } from '../MaterialPanel/registerConfig';
@@ -18,6 +18,7 @@ import { IComponent } from '../MaterialPanel/registerConfig';
 let CanvasArea = (_props: IProps) => {
     //变量声明、解构
     const { currentMaterial, setCurrentMaterial, setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
+    const ref = useRef(null);
 
     //组件状态
 
@@ -85,9 +86,10 @@ let CanvasArea = (_props: IProps) => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             style={{ ...currentSchema.container }}
+            ref={ref}
         >
             {currentSchema.blocks.map((block: IComponent, index: number) => (
-                <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, block, index)} />
+                <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, block, index)} parentRef={ref} />
             ))}
         </div>
     );

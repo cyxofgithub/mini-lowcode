@@ -29,14 +29,14 @@ const registerConfig = createEditorConfig();
 registerConfig.register({
     label: '文本',
     preview: () => '预览文本',
-    render: () => '渲染文本',
+    render: () => <span style={{ display: 'inline-block', width: 'max-content' }}>渲染文本</span>,
     type: 'text',
 });
 
 registerConfig.register({
     label: '按钮',
-    preview: () => <button>预览按钮</button>,
-    render: () => <button>渲染按钮</button>,
+    preview: () => <button style={{ width: 'max-content' }}>预览按钮</button>,
+    render: () => <button style={{ width: 'max-content' }}> 渲染按钮</button>,
     type: 'button',
 });
 

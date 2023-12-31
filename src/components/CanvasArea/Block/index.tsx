@@ -18,7 +18,7 @@ import { GlobalContext } from '../../../store';
 let Block = (_props: IProps) => {
     //变量声明、解构
     const blockRef = useRef<any>();
-    const { block, parentRef, ...otherProps } = _props;
+    const { block, parentRef, onMouseDown } = _props;
     const { setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
 
     const blockStyle = {
@@ -38,21 +38,22 @@ let Block = (_props: IProps) => {
 
     //逻辑处理函数
     const handleMouseDown = (e: any) => {
+        onMouseDown(e);
         // 进行移动
         handleBlockMove(e);
     };
 
     const handleBlockMove = (e: { clientX: any; clientY: any }) => {
         // 1、记录鼠标拖动前的位置信息，以及所有选中元素的位置信息
-        const startPlace = {
+        const dragState = {
             startX: e.clientX,
             startY: e.clientY,
         };
 
         const blockMouseMove = (e: { clientX: any; clientY: any }) => {
             const { clientX: moveX, clientY: moveY } = e;
-            const durX = moveX - startPlace.startX;
-            const durY = moveY - startPlace.startY;
+            const durX = moveX - dragState.startX;
+            const durY = moveY - dragState.startY;
 
             const parentRect = parentRef.current?.getBoundingClientRect();
             const blockRect = blockRef.current?.getBoundingClientRect();
@@ -68,7 +69,6 @@ let Block = (_props: IProps) => {
 
                 newLeft = Math.max(0, Math.min(newLeft, maxX));
                 newTop = Math.max(0, Math.min(newTop, maxY));
-
                 // @ts-ignore
                 block.style.top = newTop;
                 // @ts-ignore
@@ -95,7 +95,6 @@ let Block = (_props: IProps) => {
             className={`editor-block ${block.focus ? 'editor-block-focus' : ''}`}
             style={blockStyle}
             ref={blockRef}
-            {...otherProps}
             onMouseDown={handleMouseDown}
         >
             {RenderComponent}

@@ -1,5 +1,5 @@
 import './index.css';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { GlobalContext } from '../../store';
 import { Block } from './Block';
 import { IComponent } from '../MaterialPanel/registerConfig';
@@ -59,11 +59,7 @@ let CanvasArea = (_props: IProps) => {
         refresh && setCurrentSchema({ ...currentSchema });
     };
 
-    const handleMouseDown = (
-        e: { preventDefault: () => void; stopPropagation: () => void },
-        block: IComponent,
-        index: number
-    ) => {
+    const handleMouseDown = (e: { preventDefault: () => void; stopPropagation: () => void }, index: number) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -72,11 +68,6 @@ let CanvasArea = (_props: IProps) => {
 
         setCurrentSchema({ ...currentSchema });
     };
-
-    //组件Effect
-    useEffect(() => {
-        console.log(currentSchema);
-    }, [currentSchema]);
 
     return (
         <div
@@ -89,7 +80,7 @@ let CanvasArea = (_props: IProps) => {
             ref={ref}
         >
             {currentSchema.blocks.map((block: IComponent, index: number) => (
-                <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, block, index)} parentRef={ref} />
+                <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, index)} parentRef={ref} />
             ))}
         </div>
     );

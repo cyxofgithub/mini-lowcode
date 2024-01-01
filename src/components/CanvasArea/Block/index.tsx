@@ -43,37 +43,43 @@ let Block = (_props: IProps) => {
         handleBlockMove(e);
     };
 
-    const handleBlockMove = (e: { clientX: any; clientY: any }) => {
-        // 1、记录鼠标拖动前的位置信息，以及所有选中元素的位置信息
-        const dragState = {
+    const handleBlockMove = (e: { clientX: number; clientY: number }) => {
+        // 记录起始位置
+        const initialPlace = {
             startX: e.clientX,
             startY: e.clientY,
         };
 
-        const blockMouseMove = (e: { clientX: any; clientY: any }) => {
-            const { clientX: moveX, clientY: moveY } = e;
-            const durX = moveX - dragState.startX;
-            const durY = moveY - dragState.startY;
+        const blockMouseMove = (e: { clientX: number; clientY: number }) => {
+            const { clientX, clientY } = e;
 
-            const parentRect = parentRef.current?.getBoundingClientRect();
-            const blockRect = blockRef.current?.getBoundingClientRect();
+            // 计算移动的距离
+            const movX = clientX - initialPlace.startX;
+            const movY = clientY - initialPlace.startY;
 
-            if (parentRect && blockRect) {
-                const maxX = parentRect.width - blockRect.width;
-                const maxY = parentRect.height - blockRect.height;
+            if (parentRef.current && blockRef.current) {
+                const { clientWidth: pW, clientHeight: pH } = parentRef.current;
+                const { clientWidth: bW, clientHeight: bH } = blockRef.current;
+
+                // 限制移动范围
+                const maxX = pW - bW;
+                const maxY = pH - bH;
 
                 // @ts-ignore
-                let newLeft = blockStyle.left + durX;
+                let newLeft = blockStyle.left + movX;
                 // @ts-ignore
-                let newTop = blockStyle.top + durY;
+                let newTop = blockStyle.top + movY;
 
                 newLeft = Math.max(0, Math.min(newLeft, maxX));
                 newTop = Math.max(0, Math.min(newTop, maxY));
+
+                // 更新位置
                 // @ts-ignore
                 block.style.top = newTop;
                 // @ts-ignore
                 block.style.left = newLeft;
 
+                // 更新视图
                 setCurrentSchema({ ...currentSchema });
             }
         };
@@ -83,7 +89,7 @@ let Block = (_props: IProps) => {
             document.removeEventListener('mouseup', blockMouseUp);
         };
 
-        // 2、通过 document 监听移动事件，计算每次移动的新位置，去改变 focus block 的 top 和 left
+        // 通过 document 监听移动事件和鼠标抬起事件
         document.addEventListener('mousemove', blockMouseMove);
         document.addEventListener('mouseup', blockMouseUp);
     };

@@ -6,7 +6,6 @@ export interface IComponent {
     render: () => JSX.Element | string;
     type: string;
     style?: CSSProperties;
-    alignCenter?: boolean;
     focus?: boolean;
 }
 

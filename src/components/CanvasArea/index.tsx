@@ -27,30 +27,36 @@ let CanvasArea = (_props: IProps) => {
     //数据转换
 
     //逻辑处理函数
+    //当拖拽元素进入渲染区域时改变光标手势，表示元素进入渲染区域
     const handleDragEnter = (event: { dataTransfer: { dropEffect: string } }) =>
         (event.dataTransfer.dropEffect = 'move');
 
-    const handleDragOver = (event: { preventDefault: () => any }) => event.preventDefault();
-
+    //当拖拽元素离开渲染区域时恢复正常光标，表示元素离开渲染区域
     const handleDragLeave = (event: { dataTransfer: { dropEffect: string } }) =>
         (event.dataTransfer.dropEffect = 'none');
 
+    //取消默认的拖放行为，如阻止打开文件链接
+    const handleDragOver = (event: { preventDefault: () => any }) => event.preventDefault();
+
+    //当放置元素时将元素加入渲染区域渲染
     const handleDrop = (event: any) => {
+        // 1、 获取元素位置
         const { offsetX, offsetY } = event.nativeEvent;
+        // 2、生成组件配置
         const config = {
             type: currentMaterial?.type,
-            alignCenter: true, // 表示拖拽到画布后，基于鼠标位置居中展示
             focus: false,
             style: {
-                width: undefined,
-                height: undefined,
                 left: offsetX,
                 top: offsetY,
                 zIndex: 1,
             },
         };
+        // 3、将组件配置加入画布配置中
         currentSchema.blocks.push(config);
+        // 4、更新画布配置
         setCurrentSchema({ ...currentSchema });
+        // 5、清空当前选中的物料组件
         setCurrentMaterial(null);
     };
 

@@ -25,6 +25,7 @@ let MaterialPanel = (_props: IProps) => {
     //数据转换
 
     //逻辑处理函数
+    //监听 dragStart 事件在拖拽开始时记录被拖拽组件信息
     const handleDragStart = (component: IComponent) => {
         setCurrentMaterial(component);
     };

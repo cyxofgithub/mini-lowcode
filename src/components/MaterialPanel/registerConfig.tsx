@@ -7,6 +7,7 @@ export interface IComponent {
     type: string;
     style?: CSSProperties;
     focus?: boolean;
+    element?: HTMLElement;
 }
 
 const createEditorConfig = () => {

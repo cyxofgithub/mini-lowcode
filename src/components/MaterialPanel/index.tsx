@@ -26,7 +26,8 @@ let MaterialPanel = (_props: IProps) => {
 
     //逻辑处理函数
     //监听 dragStart 事件在拖拽开始时记录被拖拽组件信息
-    const handleDragStart = (component: IComponent) => {
+    const handleDragStart = (e: any, component: IComponent) => {
+        component.element = e?.target ?? null;
         setCurrentMaterial(component);
     };
 
@@ -37,7 +38,7 @@ let MaterialPanel = (_props: IProps) => {
             {registerConfig.componentList.map(component => (
                 <div key={component.type} className="editor-left-item">
                     <span>{component.label}</span>
-                    <div draggable onDragStart={() => handleDragStart(component)}>
+                    <div draggable onDragStart={e => handleDragStart(e, component)}>
                         {component.preview()}
                     </div>
                 </div>

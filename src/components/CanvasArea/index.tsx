@@ -42,13 +42,17 @@ let CanvasArea = (_props: IProps) => {
     const handleDrop = (event: any) => {
         // 1、 获取元素位置
         const { offsetX, offsetY } = event.nativeEvent;
+        const { clientWidth, clientHeight } = currentMaterial?.element ?? { clientWidth: 0, clientHeight: 0 };
+        const maxLeft = currentSchema.container.width - clientWidth;
+        const maxTop = currentSchema.container.height - clientHeight;
+
         // 2、生成组件配置
         const config = {
             type: currentMaterial?.type,
             focus: false,
             style: {
-                left: offsetX,
-                top: offsetY,
+                left: Math.min(offsetX, maxLeft),
+                top: Math.min(offsetY, maxTop),
                 zIndex: 1,
             },
         };

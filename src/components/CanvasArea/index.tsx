@@ -43,16 +43,25 @@ let CanvasArea = (_props: IProps) => {
         // 1、 获取元素位置
         const { offsetX, offsetY } = event.nativeEvent;
         const { clientWidth, clientHeight } = currentMaterial?.element ?? { clientWidth: 0, clientHeight: 0 };
+        const offsetInfo = currentMaterial?.offsetInfo ?? { offsetX: 0, offsetY: 0 };
         const maxLeft = currentSchema.container.width - clientWidth;
         const maxTop = currentSchema.container.height - clientHeight;
+
+        // 修正元素偏移量
+        const left = offsetX - offsetInfo.offsetX;
+        const right = offsetY - offsetInfo.offsetY;
+
+        // 限制元素位置不超出渲染区域
+        const curLeft = Math.max(Math.min(left, maxLeft), 0);
+        const curRight = Math.max(Math.min(right, maxTop), 0);
 
         // 2、生成组件配置
         const config = {
             type: currentMaterial?.type,
             focus: false,
             style: {
-                left: Math.min(offsetX, maxLeft),
-                top: Math.min(offsetY, maxTop),
+                left: curLeft,
+                top: curRight,
                 zIndex: 1,
             },
         };

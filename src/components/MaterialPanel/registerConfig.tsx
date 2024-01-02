@@ -8,6 +8,10 @@ export interface IComponent {
     style?: CSSProperties;
     focus?: boolean;
     element?: HTMLElement;
+    offsetInfo?: {
+        offsetX: number;
+        offsetY: number;
+    };
 }
 
 const createEditorConfig = () => {

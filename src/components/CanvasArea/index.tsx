@@ -38,22 +38,26 @@ let CanvasArea = (_props: IProps) => {
     //取消默认的拖放行为，如阻止打开文件链接
     const handleDragOver = (event: { preventDefault: () => any }) => event.preventDefault();
 
-    //当放置元素时将元素加入渲染区域渲染
+    //当放置元素时生成元素配置加入渲染区域渲染
     const handleDrop = (event: any) => {
         // 1、 获取元素位置
         const { offsetX, offsetY } = event.nativeEvent;
         const { clientWidth, clientHeight } = currentMaterial?.element ?? { clientWidth: 0, clientHeight: 0 };
+
+        // 开始拖拽元素时鼠标相对于元素的左边缘位置信息
         const offsetInfo = currentMaterial?.offsetInfo ?? { offsetX: 0, offsetY: 0 };
+
+        // 两个值相减即可得修正后元素偏移量
+        const left = offsetX - offsetInfo.offsetX;
+        const top = offsetY - offsetInfo.offsetY;
+
+        // 元素可偏移的最大位置
         const maxLeft = currentSchema.container.width - clientWidth;
         const maxTop = currentSchema.container.height - clientHeight;
 
-        // 修正元素偏移量
-        const left = offsetX - offsetInfo.offsetX;
-        const right = offsetY - offsetInfo.offsetY;
-
         // 限制元素位置不超出渲染区域
         const curLeft = Math.max(Math.min(left, maxLeft), 0);
-        const curRight = Math.max(Math.min(right, maxTop), 0);
+        const curTop = Math.max(Math.min(top, maxTop), 0);
 
         // 2、生成组件配置
         const config = {
@@ -61,7 +65,7 @@ let CanvasArea = (_props: IProps) => {
             focus: false,
             style: {
                 left: curLeft,
-                top: curRight,
+                top: curTop,
                 zIndex: 1,
             },
         };

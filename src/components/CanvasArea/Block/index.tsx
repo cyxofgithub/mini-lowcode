@@ -39,18 +39,32 @@ let Block = (_props: IProps) => {
     //逻辑处理函数
     const handleMouseDown = (e: any) => {
         onMouseDown(e);
-        // 进行移动
-        handleBlockMove(e);
+        _onMouseDown(e);
     };
 
-    const handleBlockMove = (e: { clientX: number; clientY: number }) => {
+    const _onMouseDown = (e: { clientX: number; clientY: number }) => {
         // 记录起始位置
         const initialPlace = {
             startX: e.clientX,
             startY: e.clientY,
         };
 
-        const blockMouseMove = (e: { clientX: number; clientY: number }) => {
+        const _blockMouseMove = blockMouseMove(initialPlace);
+
+        // 在抬起的时候移除移动和抬起事件
+        const blockMouseUp = () => {
+            document.removeEventListener('mousemove', _blockMouseMove);
+            document.removeEventListener('mouseup', blockMouseUp);
+        };
+
+        // 动态绑定移动事件和鼠标抬起事件
+        document.addEventListener('mousemove', _blockMouseMove);
+        document.addEventListener('mouseup', blockMouseUp);
+    };
+
+    // 在移动的时候实时更新元素位置
+    const blockMouseMove = (initialPlace: { startX: number; startY: number }) => {
+        return (e: { clientX: number; clientY: number }) => {
             const { clientX, clientY } = e;
 
             // 计算移动的距离
@@ -61,7 +75,7 @@ let Block = (_props: IProps) => {
                 const { clientWidth: pW, clientHeight: pH } = parentRef.current;
                 const { clientWidth: bW, clientHeight: bH } = blockRef.current;
 
-                // 限制移动范围
+                // 限制移动范围在渲染区域内 start
                 const maxX = pW - bW;
                 const maxY = pH - bH;
 
@@ -72,29 +86,18 @@ let Block = (_props: IProps) => {
 
                 newLeft = Math.max(0, Math.min(newLeft, maxX));
                 newTop = Math.max(0, Math.min(newTop, maxY));
+                // 限制移动范围在渲染区域内 end
 
                 // 更新位置
                 // @ts-ignore
                 block.style.top = newTop;
                 // @ts-ignore
                 block.style.left = newLeft;
-
                 // 更新视图
                 setCurrentSchema({ ...currentSchema });
             }
         };
-
-        const blockMouseUp = () => {
-            document.removeEventListener('mousemove', blockMouseMove);
-            document.removeEventListener('mouseup', blockMouseUp);
-        };
-
-        // 通过 document 监听移动事件和鼠标抬起事件
-        document.addEventListener('mousemove', blockMouseMove);
-        document.addEventListener('mouseup', blockMouseUp);
     };
-
-    //组件Effect
 
     return (
         <div

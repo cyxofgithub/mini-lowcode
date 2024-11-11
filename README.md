@@ -19,6 +19,11 @@ yarn start
 
 [《从 0 到 1 搭建低代码平台-编辑拖拽实现》](https://juejin.cn/post/7319297259643764770#heading-5)
 
+## 分支说明
+
+-   drag 拖拽效果实现
+-   drag-auxiliary-line 拖拽辅助线效果
+
 ## todo
 
 -   如果容器有缩放怎么调整这些位置信息？

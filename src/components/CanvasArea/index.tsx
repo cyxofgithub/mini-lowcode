@@ -103,8 +103,8 @@ let CanvasArea = (_props: IProps) => {
     };
 
     const blocksFocusInfo = () => {
-        const focusBlocks: Pick<IBlock, 'style'>[] = [];
-        const unfocusedBlocks: Pick<IBlock, 'style'>[] = [
+        const focusBlocks: IBlock[] = [];
+        const unfocusedBlocks: IBlock[] = [
             // 画布的边界也是一个 block，用于实现 block 移动时的辅助线
             {
                 style: {
@@ -113,14 +113,14 @@ let CanvasArea = (_props: IProps) => {
                     width: currentSchema.container.width,
                     height: currentSchema.container.height,
                 },
-            },
+            } as IBlock,
         ];
 
         currentSchema.blocks.forEach(block => {
             if (block.focus) {
-                focusBlocks.push({ style: { ...block.style } });
+                focusBlocks.push(block);
             } else {
-                unfocusedBlocks.push({ style: { ...block.style } });
+                unfocusedBlocks.push(block);
             }
         });
 
@@ -135,20 +135,29 @@ let CanvasArea = (_props: IProps) => {
 
         dragState.current = {
             // 用于实现 block 在画布上进行移动
-            startX: e.clientX,
+            startX: e.clientX, // 鼠标按下时的位置相对于浏览器视口的坐标
             startY: e.clientY,
             startPos: focusBlocks.map(({ style }) => ({ top: style.top, left: style.left })),
 
             // 用于实现 block 在画布上的辅助线
-            startLeft: BLeft,
+            startLeft: BLeft, // 当前选中 block 相对于 container 的左边距
             startTop: BTop,
 
             // 找到其余 A block（unfocusedBlocks）作为参照物时，参照物周围可能出现的 lines
             lines: (() => {
+                // 计算横线的位置使用 y 存放；纵线的位置使用 x 存放。
                 const lines: {
-                    x: { showLeft: number; left: number }[];
-                    y: { showTop: number; top: number }[];
-                } = { x: [], y: [] }; // 计算横线的位置使用 y 存放；纵线的位置使用 x 存放。
+                    x: {
+                        // 辅助线位置
+                        showLeft: number;
+                        // 触发辅助线显示的位置
+                        left: number;
+                    }[];
+                    y: {
+                        showTop: number;
+                        top: number;
+                    }[];
+                } = { x: [], y: [] };
 
                 // 收集 B 移动到每个 unfocusedBlocks 周围时，要显示的 10 条线信息
                 unfocusedBlocks.forEach(block => {
@@ -188,6 +197,8 @@ let CanvasArea = (_props: IProps) => {
                 if (Math.abs(l - left) < 5) {
                     // 接近 5 像素距离时显示辅助线
                     x = s;
+                    // todo: 实现吸附效果
+                    // moveX = dragState.current.startX - dragState.current.startLeft + s;
                     break;
                 }
             }
@@ -196,6 +207,8 @@ let CanvasArea = (_props: IProps) => {
                 if (Math.abs(t - top) < 5) {
                     // 接近 5 像素距离时显示辅助线
                     y = s;
+                    // todo: 实现吸附效果
+                    // moveY = dragState.current.startY - dragState.current.startTop + s;
                     break;
                 }
             }

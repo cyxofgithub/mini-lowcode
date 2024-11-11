@@ -5,6 +5,7 @@ export interface IComponent {
     preview: () => JSX.Element | string;
     render: () => JSX.Element | string;
     type: string;
+    focusShape: 'scaleDot' | 'scaleLine';
     style?: CSSProperties;
     focus?: boolean;
     element?: HTMLElement;
@@ -32,16 +33,18 @@ const registerConfig = createEditorConfig();
 
 registerConfig.register({
     label: '文本',
-    preview: () => '预览文本',
-    render: () => <span style={{ display: 'inline-block', width: 'max-content' }}>渲染文本</span>,
+    preview: () => '四个角度缩放',
+    render: () => <span style={{ display: 'inline-block', width: 'max-content' }}>四个角度缩放</span>,
     type: 'text',
+    focusShape: 'scaleDot',
 });
 
 registerConfig.register({
     label: '按钮',
-    preview: () => <button style={{ width: 'max-content' }}>预览按钮</button>,
-    render: () => <button style={{ width: 'max-content' }}> 渲染按钮</button>,
+    preview: () => <button style={{ width: 'max-content' }}>横纵伸缩</button>,
+    render: () => <button style={{ width: 'max-content' }}>横纵伸缩</button>,
     type: 'button',
+    focusShape: 'scaleLine',
 });
 
 registerConfig.register({
@@ -49,6 +52,7 @@ registerConfig.register({
     preview: () => <input placeholder="预览输入框" />,
     render: () => <input placeholder="渲染输入框" />,
     type: 'input',
+    focusShape: 'scaleLine',
 });
 
 export default registerConfig;

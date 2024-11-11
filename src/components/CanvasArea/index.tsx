@@ -1,8 +1,7 @@
 import './index.css';
-import React, { useRef } from 'react';
-import { GlobalContext } from '../../store';
+import React, { useRef, useState } from 'react';
+import { GlobalContext, IBlock } from '../../store';
 import { Block } from './Block';
-import { IComponent } from '../MaterialPanel/registerConfig';
 
 //私有常量
 
@@ -19,6 +18,13 @@ let CanvasArea = (_props: IProps) => {
     //变量声明、解构
     const { currentMaterial, setCurrentMaterial, setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
     const ref = useRef(null);
+
+    // 记录当前选中拖动的 block 索引
+    const currentBlockIndex = useRef(-1);
+    // 水平、垂直辅助线显示的位置
+    const [markLine, setMarkLine] = useState({ x: null, y: null });
+
+    const dragState = useRef<any>();
 
     //组件状态
 
@@ -40,9 +46,10 @@ let CanvasArea = (_props: IProps) => {
 
     //当放置元素时生成元素配置加入渲染区域渲染
     const handleDrop = (event: any) => {
+        if (!currentMaterial) return;
         // 1、 获取元素位置
         const { offsetX, offsetY } = event.nativeEvent;
-        const { clientWidth, clientHeight } = currentMaterial?.element ?? { clientWidth: 0, clientHeight: 0 };
+        const { clientWidth, clientHeight } = currentMaterial.element ?? { clientWidth: 0, clientHeight: 0 };
 
         // 开始拖拽元素时鼠标相对于元素的左边缘位置信息
         const offsetInfo = currentMaterial?.offsetInfo ?? { offsetX: 0, offsetY: 0 };
@@ -61,7 +68,7 @@ let CanvasArea = (_props: IProps) => {
 
         // 2、生成组件配置
         const config = {
-            type: currentMaterial?.type,
+            type: currentMaterial.type,
             focus: false,
             style: {
                 left: curLeft,
@@ -78,18 +85,131 @@ let CanvasArea = (_props: IProps) => {
     };
 
     const cleanBlocksFocus = (refresh?: boolean) => {
-        currentSchema.blocks.forEach((block: IComponent) => (block.focus = false));
+        currentSchema.blocks.forEach((block: IBlock) => (block.focus = false));
         refresh && setCurrentSchema({ ...currentSchema });
     };
 
-    const handleMouseDown = (e: { preventDefault: () => void; stopPropagation: () => void }, index: number) => {
+    const handleMouseDown = (e: any, index: number) => {
         e.preventDefault();
         e.stopPropagation();
 
         cleanBlocksFocus();
         currentSchema.blocks[index].focus = true;
+        currentBlockIndex.current = index;
+
+        handleBlockMove(e);
 
         setCurrentSchema({ ...currentSchema });
+    };
+
+    const blocksFocusInfo = () => {
+        const focusBlocks: IBlock[] = [];
+        const unfocusedBlocks: IBlock[] = [];
+
+        currentSchema.blocks.forEach(block => {
+            if (block.focus) {
+                focusBlocks.push({ ...block });
+            } else {
+                unfocusedBlocks.push({ ...block });
+            }
+        });
+
+        return { focusBlocks, unfocusedBlocks };
+    };
+
+    const handleBlockMove = (e: { clientX: any; clientY: any }) => {
+        const { focusBlocks, unfocusedBlocks } = blocksFocusInfo();
+        const lastSelectBlock = currentSchema.blocks[currentBlockIndex.current];
+        // 我们声明：B 代表最近一个选中拖拽的元素，A 则是对应的参照物，对比两者的位置
+        const { width: BWidth = 0, height: BHeight = 0, left: BLeft, top: BTop } = lastSelectBlock.style;
+
+        dragState.current = {
+            // 用于实现 block 在画布上进行移动
+            startX: e.clientX,
+            startY: e.clientY,
+            startPos: focusBlocks.map(({ style }) => ({ top: style.top, left: style.left })),
+
+            // 用于实现 block 在画布上的辅助线
+            startLeft: BLeft,
+            startTop: BTop,
+
+            // 找到其余 A block（unfocusedBlocks）作为参照物时，参照物周围可能出现的 lines
+            lines: (() => {
+                const lines: {
+                    x: { showLeft: number; left: number }[];
+                    y: { showTop: number; top: number }[];
+                } = { x: [], y: [] }; // 计算横线的位置使用 y 存放；纵线的位置使用 x 存放。
+
+                // 收集 B 移动到每个 unfocusedBlocks 周围时，要显示的 10 条线信息
+                unfocusedBlocks.forEach(block => {
+                    const { top: ATop, left: ALeft, width: AWidth = 0, height: AHeight = 0 } = block.style;
+
+                    // 水平横线显示的 5 种情况：（可以对着上图来看）
+                    lines.y.push({ showTop: ATop, top: ATop }); // 情况一：A 和 B 顶和顶对其。当拖拽元素移动到 ATop（lines.y.top） 位置时，显示这根辅助线，辅助线的位置是 ATop（lines.y.showTop）
+                    lines.y.push({ showTop: ATop, top: ATop - BHeight }); // 情况二：A 和 B 顶对底
+                    lines.y.push({ showTop: ATop + AHeight / 2, top: ATop + AHeight / 2 - BHeight / 2 }); // 情况三：A 和 B 中对中
+                    lines.y.push({ showTop: ATop + AHeight, top: ATop + AHeight }); // 情况四：A和B 底对顶
+                    lines.y.push({ showTop: ATop + AHeight, top: ATop + AHeight - BHeight }); // 情况四：A和B 底对底
+
+                    // 垂直纵线显示的 5 种情况：（可以对着上图来看）
+                    lines.x.push({ showLeft: ALeft, left: ALeft }); // A 和 B 左对左，线条显示在 A 的左边
+                    lines.x.push({ showLeft: ALeft + AWidth, left: ALeft + AWidth }); // A 和 B 右对左，线条显示在 A 的右边
+                    lines.x.push({ showLeft: ALeft + AWidth / 2, left: ALeft + AWidth / 2 - BWidth / 2 }); // A 和 B 中对中，线条显示在 A 的中间
+                    lines.x.push({ showLeft: ALeft + AWidth, left: ALeft + AWidth - BWidth }); // A 和 B 右对右，线条显示在 A 的右边
+                    lines.x.push({ showLeft: ALeft, left: ALeft - BWidth }); // A 和 B 左对右，线条显示在 A 的左边
+                });
+
+                return lines;
+            })(),
+        };
+
+        const blockMouseMove = (e: { clientX: any; clientY: any }) => {
+            let { clientX: moveX, clientY: moveY } = e;
+
+            // 计算鼠标拖动后，B block 最新的 left 和 top 值
+            let left = moveX - dragState.current.startX + dragState.current.startLeft;
+            let top = moveY - dragState.current.startY + dragState.current.startTop;
+            let x = null,
+                y = null;
+
+            // 将当前 B block 移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有 A block 存在，显示对应的辅助线
+            for (let i = 0; i < dragState.current.lines.x.length; i++) {
+                const { left: l, showLeft: s } = dragState.current.lines.x[i];
+                if (Math.abs(l - left) < 5) {
+                    // 接近 5 像素距离时显示辅助线
+                    x = s;
+                    break;
+                }
+            }
+            for (let i = 0; i < dragState.current.lines.y.length; i++) {
+                const { top: t, showTop: s } = dragState.current.lines.y[i];
+                if (Math.abs(t - top) < 5) {
+                    // 接近 5 像素距离时显示辅助线
+                    y = s;
+                    break;
+                }
+            }
+
+            setMarkLine({ x, y });
+
+            const durX = moveX - dragState.current.startX;
+            const durY = moveY - dragState.current.startY;
+
+            focusBlocks.forEach((block, index) => {
+                block.style.top = dragState.current.startPos[index].top + durY;
+                block.style.left = dragState.current.startPos[index].left + durX;
+            });
+
+            setCurrentSchema({ ...currentSchema });
+        };
+
+        const blockMouseUp = () => {
+            document.removeEventListener('mousemove', blockMouseMove);
+            document.removeEventListener('mouseup', blockMouseUp);
+        };
+
+        document.addEventListener('mousemove', blockMouseMove);
+        document.addEventListener('mouseup', blockMouseUp);
     };
 
     return (
@@ -102,9 +222,11 @@ let CanvasArea = (_props: IProps) => {
             style={{ ...currentSchema.container }}
             ref={ref}
         >
-            {currentSchema.blocks.map((block: IComponent, index: number) => (
+            {currentSchema.blocks.map((block: IBlock, index: number) => (
                 <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, index)} parentRef={ref} />
             ))}
+            {markLine.x !== null && <div className="editor-line-x" style={{ left: markLine.x }}></div>}
+            {markLine.y !== null && <div className="editor-line-y" style={{ top: markLine.y }}></div>}
         </div>
     );
 };

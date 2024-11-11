@@ -177,6 +177,11 @@ let Block = (_props: IProps) => {
         document.addEventListener('mouseup', pointMouseUp);
     };
 
+    // 用于阻止冒泡
+    const handleClickBlock = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+    };
+
     useEffect(() => {
         if (!blockRef.current) return;
         let { width, height } = blockRef.current.getBoundingClientRect();
@@ -195,6 +200,7 @@ let Block = (_props: IProps) => {
             style={blockStyle}
             ref={blockRef}
             onMouseDown={handleMouseDown}
+            onClick={handleClickBlock}
         >
             {RenderComponent}
             {block.focus ? (

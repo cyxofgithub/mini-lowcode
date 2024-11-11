@@ -216,10 +216,19 @@ let CanvasArea = (_props: IProps) => {
         const blockMouseUp = () => {
             document.removeEventListener('mousemove', blockMouseMove);
             document.removeEventListener('mouseup', blockMouseUp);
+            setMarkLine({ x: null, y: null });
         };
 
         document.addEventListener('mousemove', blockMouseMove);
         document.addEventListener('mouseup', blockMouseUp);
+    };
+
+    // 点击画布空白处时清空所有 block 的 focus 状态
+    const handleClickCanvas = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+
+        currentBlockIndex.current = -1;
+        cleanBlocksFocus(true);
     };
 
     return (
@@ -229,6 +238,7 @@ let CanvasArea = (_props: IProps) => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onClick={handleClickCanvas}
             style={{ ...currentSchema.container }}
             ref={ref}
         >

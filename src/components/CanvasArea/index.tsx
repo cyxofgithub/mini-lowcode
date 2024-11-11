@@ -103,14 +103,24 @@ let CanvasArea = (_props: IProps) => {
     };
 
     const blocksFocusInfo = () => {
-        const focusBlocks: IBlock[] = [];
-        const unfocusedBlocks: IBlock[] = [];
+        const focusBlocks: Pick<IBlock, 'style'>[] = [];
+        const unfocusedBlocks: Pick<IBlock, 'style'>[] = [
+            // 画布的边界也是一个 block，用于实现 block 移动时的辅助线
+            {
+                style: {
+                    left: 0,
+                    top: 0,
+                    width: currentSchema.container.width,
+                    height: currentSchema.container.height,
+                },
+            },
+        ];
 
         currentSchema.blocks.forEach(block => {
             if (block.focus) {
-                focusBlocks.push({ ...block });
+                focusBlocks.push({ style: { ...block.style } });
             } else {
-                unfocusedBlocks.push({ ...block });
+                unfocusedBlocks.push({ style: { ...block.style } });
             }
         });
 

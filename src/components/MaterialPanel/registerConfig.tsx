@@ -32,17 +32,17 @@ const createEditorConfig = () => {
 const registerConfig = createEditorConfig();
 
 registerConfig.register({
-    label: '文本',
-    preview: () => '四个角度缩放',
-    render: () => <span style={{ display: 'inline-block', width: 'max-content' }}>四个角度缩放</span>,
+    label: '按钮',
+    preview: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>四个角度缩放</button>,
+    render: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>四个角度缩放</button>,
     type: 'text',
     focusShape: 'scaleDot',
 });
 
 registerConfig.register({
     label: '按钮',
-    preview: () => <button style={{ width: 'max-content' }}>横纵伸缩</button>,
-    render: () => <button style={{ width: 'max-content' }}>横纵伸缩</button>,
+    preview: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>横纵伸缩</button>,
+    render: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>横纵伸缩</button>,
     type: 'button',
     focusShape: 'scaleLine',
 });

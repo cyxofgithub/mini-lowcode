@@ -15,7 +15,8 @@ export type IBlock = Pick<IComponent, 'type' | 'focus'> & {
         height?: number;
         zIndex?: number;
     };
-    focusShape?: IComponent['focusShape'];
+    focus: boolean;
+    focusShape: IComponent['focusShape'];
 };
 interface ISchema {
     container: {

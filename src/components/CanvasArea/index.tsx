@@ -67,7 +67,7 @@ let CanvasArea = (_props: IProps) => {
         const curTop = Math.max(Math.min(top, maxTop), 0);
 
         // 2、生成组件配置
-        const config = {
+        const config: IBlock = {
             type: currentMaterial.type,
             focus: false,
             style: {
@@ -75,6 +75,7 @@ let CanvasArea = (_props: IProps) => {
                 top: curTop,
                 zIndex: 1,
             },
+            focusShape: currentMaterial.focusShape,
         };
         // 3、将组件配置加入画布配置中
         currentSchema.blocks.push(config);

@@ -8,21 +8,20 @@
     border: 1px solid #1890ff;
 }
 
-.block-focus-shape {
-    &__dot {
-        position: absolute;
-        width: 9px;
-        height: 9px;
-        margin-left: -5px;
-        margin-top: -5px;
-        border-radius: 50%;
-        background: #3297fc;
-        cursor: pointer;
-    }
-    &__line {
-        position: absolute;
-        background: #3297fc;
-        box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.1);
-        border-radius: 2px;
-    }
+.block-focus-shape__dot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    margin-left: -5px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: #3297fc;
+    cursor: pointer;
+}
+
+.block-focus-shape__line {
+    position: absolute;
+    background: #3297fc;
+    box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
 }

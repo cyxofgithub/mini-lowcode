@@ -21,8 +21,10 @@ yarn start
 
 ## 分支说明
 
+-   main 完整分支
 -   drag 拖拽效果实现
 -   drag-auxiliary-line 拖拽辅助线效果
+-   scale 缩放效果实现
 
 ## todo
 

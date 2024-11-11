@@ -32,11 +32,8 @@ let Block = (_props: IProps) => {
     const blockRef = useRef<any>();
     const { block, parentRef, onMouseDown } = _props;
     const { setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
-
     const blockStyle = {
-        top: block?.style?.top,
-        left: block?.style?.left,
-        zIndex: block?.style?.zIndex,
+        ...block.style,
     };
 
     const component = registerConfig.componentMap[block.type];
@@ -145,7 +142,6 @@ let Block = (_props: IProps) => {
         event.stopPropagation();
         const { clientX: startX, clientY: startY } = event;
         const { width, height, left, top } = block?.style ?? { width: 0, height: 0, left: 0, top: 0 };
-        debugger;
 
         const pointMouseMove = (event: { clientX: any; clientY: any }) => {
             const hasL = /l/.test(point),
@@ -166,6 +162,8 @@ let Block = (_props: IProps) => {
                 // @ts-ignore
                 top: Math.min(top + height, top + (hasT ? durY : 0)), // 从上往下拖，不能超过 bottom，从下往上拖，top 不懂
             };
+
+            setCurrentSchema({ ...currentSchema });
         };
 
         const pointMouseUp = () => {

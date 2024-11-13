@@ -105,7 +105,7 @@ let CanvasArea = (_props: IProps) => {
 
     const blocksFocusInfo = () => {
         const focusBlocks: IBlock[] = [];
-        const unfocusedBlocks: IBlock[] = [
+        const unFocusedBlocks: IBlock[] = [
             // 画布的边界也是一个 block，用于实现 block 移动时的辅助线
             {
                 style: {
@@ -121,18 +121,61 @@ let CanvasArea = (_props: IProps) => {
             if (block.focus) {
                 focusBlocks.push(block);
             } else {
-                unfocusedBlocks.push(block);
+                unFocusedBlocks.push(block);
             }
         });
 
-        return { focusBlocks, unfocusedBlocks };
+        return { focusBlocks, unFocusedBlocks };
+    };
+
+    /**
+     *  获取未选中的 block 的辅助线信息
+     *  找到其余 A block（unFocusedBlocks）作为参照物时，参照物周围可能出现的 lines
+     *  */
+    const getUnFocusBlocksLineInfo = (focusBlock: IBlock, unFocusedBlocks: IBlock[]) => {
+        // 计算横线的位置使用 y 存放；纵线的位置使用 x 存放。
+        // 我们声明：B 代表最近一个选中拖拽的元素，A 则是对应的参照物，对比两者的位置
+        const { width: BWidth = 0, height: BHeight = 0 } = focusBlock.style;
+        const lines: {
+            x: {
+                // 辅助线位置
+                showLeft: number;
+                // 触发辅助线显示的位置
+                left: number;
+            }[];
+            y: {
+                showTop: number;
+                top: number;
+            }[];
+        } = { x: [], y: [] };
+
+        // 收集 B 移动到每个 unFocusedBlocks 周围时，要显示的 10 条线信息
+        unFocusedBlocks.forEach(block => {
+            const { top: ATop, left: ALeft, width: AWidth = 0, height: AHeight = 0 } = block.style;
+
+            // 水平横线显示的 5 种情况：（可以对着上图来看）
+            lines.y.push({ showTop: ATop, top: ATop }); // 情况一：A 和 B 顶和顶对其。当拖拽元素移动到 ATop（lines.y.top） 位置时，显示这根辅助线，辅助线的位置是 ATop（lines.y.showTop）
+            lines.y.push({ showTop: ATop, top: ATop - BHeight }); // 情况二：A 和 B 顶对底
+            lines.y.push({ showTop: ATop + AHeight / 2, top: ATop + AHeight / 2 - BHeight / 2 }); // 情况三：A 和 B 中对中
+            lines.y.push({ showTop: ATop + AHeight, top: ATop + AHeight }); // 情况四：A和B 底对顶
+            lines.y.push({ showTop: ATop + AHeight, top: ATop + AHeight - BHeight }); // 情况四：A和B 底对底
+
+            // 垂直纵线显示的 5 种情况：（可以对着上图来看）
+            lines.x.push({ showLeft: ALeft, left: ALeft }); // A 和 B 左对左，线条显示在 A 的左边
+            lines.x.push({ showLeft: ALeft + AWidth, left: ALeft + AWidth }); // A 和 B 右对左，线条显示在 A 的右边
+            lines.x.push({ showLeft: ALeft + AWidth / 2, left: ALeft + AWidth / 2 - BWidth / 2 }); // A 和 B 中对中，线条显示在 A 的中间
+            lines.x.push({ showLeft: ALeft + AWidth, left: ALeft + AWidth - BWidth }); // A 和 B 右对右，线条显示在 A 的右边
+            lines.x.push({ showLeft: ALeft, left: ALeft - BWidth }); // A 和 B 左对右，线条显示在 A 的左边
+        });
+
+        return lines;
     };
 
     const handleBlockMove = (e: { clientX: any; clientY: any }) => {
-        const { focusBlocks, unfocusedBlocks } = blocksFocusInfo();
-        const lastSelectBlock = currentSchema.blocks[currentBlockIndex.current];
+        const { focusBlocks, unFocusedBlocks } = blocksFocusInfo();
+        const focusBlock = focusBlocks[0];
         // 我们声明：B 代表最近一个选中拖拽的元素，A 则是对应的参照物，对比两者的位置
-        const { width: BWidth = 0, height: BHeight = 0, left: BLeft, top: BTop } = lastSelectBlock.style;
+        const { left: BLeft, top: BTop } = focusBlock.style;
 
         dragState.current = {
             // 用于实现 block 在画布上进行移动
@@ -143,44 +186,7 @@ let CanvasArea = (_props: IProps) => {
             // 用于实现 block 在画布上的辅助线
             startLeft: BLeft, // 当前选中 block 相对于 container 的左边距
             startTop: BTop,
-
-            // 找到其余 A block（unfocusedBlocks）作为参照物时，参照物周围可能出现的 lines
-            lines: (() => {
-                // 计算横线的位置使用 y 存放；纵线的位置使用 x 存放。
-                const lines: {
-                    x: {
-                        // 辅助线位置
-                        showLeft: number;
-                        // 触发辅助线显示的位置
-                        left: number;
-                    }[];
-                    y: {
-                        showTop: number;
-                        top: number;
-                    }[];
-                } = { x: [], y: [] };
-
-                // 收集 B 移动到每个 unfocusedBlocks 周围时，要显示的 10 条线信息
-                unfocusedBlocks.forEach(block => {
-                    const { top: ATop, left: ALeft, width: AWidth = 0, height: AHeight = 0 } = block.style;
-
-                    // 水平横线显示的 5 种情况：（可以对着上图来看）
-                    lines.y.push({ showTop: ATop, top: ATop }); // 情况一：A 和 B 顶和顶对其。当拖拽元素移动到 ATop（lines.y.top） 位置时，显示这根辅助线，辅助线的位置是 ATop（lines.y.showTop）
-                    lines.y.push({ showTop: ATop, top: ATop - BHeight }); // 情况二：A 和 B 顶对底
-                    lines.y.push({ showTop: ATop + AHeight / 2, top: ATop + AHeight / 2 - BHeight / 2 }); // 情况三：A 和 B 中对中
-                    lines.y.push({ showTop: ATop + AHeight, top: ATop + AHeight }); // 情况四：A和B 底对顶
-                    lines.y.push({ showTop: ATop + AHeight, top: ATop + AHeight - BHeight }); // 情况四：A和B 底对底
-
-                    // 垂直纵线显示的 5 种情况：（可以对着上图来看）
-                    lines.x.push({ showLeft: ALeft, left: ALeft }); // A 和 B 左对左，线条显示在 A 的左边
-                    lines.x.push({ showLeft: ALeft + AWidth, left: ALeft + AWidth }); // A 和 B 右对左，线条显示在 A 的右边
-                    lines.x.push({ showLeft: ALeft + AWidth / 2, left: ALeft + AWidth / 2 - BWidth / 2 }); // A 和 B 中对中，线条显示在 A 的中间
-                    lines.x.push({ showLeft: ALeft + AWidth, left: ALeft + AWidth - BWidth }); // A 和 B 右对右，线条显示在 A 的右边
-                    lines.x.push({ showLeft: ALeft, left: ALeft - BWidth }); // A 和 B 左对右，线条显示在 A 的左边
-                });
-
-                return lines;
-            })(),
+            lines: getUnFocusBlocksLineInfo(focusBlock, unFocusedBlocks),
         };
 
         const blockMouseMove = (e: { clientX: any; clientY: any }) => {

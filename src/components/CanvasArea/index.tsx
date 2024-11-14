@@ -106,7 +106,7 @@ let CanvasArea = (_props: IProps) => {
 
     const blocksFocusInfo = () => {
         const focusBlocks: IBlock[] = [];
-        const unFocusedBlocks: IBlock[] = [
+        const unFocusBlocks: IBlock[] = [
             // 画布的边界也是一个 block，用于实现 block 移动时的辅助线
             {
                 style: {
@@ -122,70 +122,66 @@ let CanvasArea = (_props: IProps) => {
             if (block.focus) {
                 focusBlocks.push(block);
             } else {
-                unFocusedBlocks.push(block);
+                unFocusBlocks.push(block);
             }
         });
 
-        return { focusBlocks, unFocusedBlocks };
+        return { focusBlocks, unFocusBlocks };
     };
 
     const handleBlockMove = (e: { clientX: any; clientY: any }) => {
-        const { focusBlocks, unFocusedBlocks } = blocksFocusInfo();
+        const { focusBlocks, unFocusBlocks } = blocksFocusInfo();
         const focusBlock = focusBlocks[0];
-        // 我们声明：B 代表最近一个选中拖拽的元素，A 则是对应的参照物，对比两者的位置
-        const { left: BLeft, top: BTop } = focusBlock.style;
+
+        const { left: fucusBlockLeft, top: focusBlockTop } = focusBlock.style;
 
         dragState.current = {
-            // 用于实现 block 在画布上进行移动
-            startX: e.clientX, // 鼠标按下时的位置相对于浏览器视口的坐标
+            startX: e.clientX, // 鼠标按下时的位置相对于浏览器视口的x坐标
             startY: e.clientY,
-            startPos: focusBlocks.map(({ style }) => ({ top: style.top, left: style.left })),
+            startPos: focusBlocks.map(({ style }) => ({ top: style.top, left: style.left })), // 拖拽前 block 的位置信息
 
             // 用于实现 block 在画布上的辅助线
-            startLeft: BLeft, // 当前选中 block 相对于 container 的左边距
-            startTop: BTop,
-            lines: getLinesPlaceInfo(focusBlock, unFocusedBlocks),
+            startLeft: fucusBlockLeft, // 当前选中 block 相对于 container 的左边距
+            startTop: focusBlockTop,
+            lines: getLinesPlaceInfo(focusBlock, unFocusBlocks),
         };
 
         const blockMouseMove = (e: { clientX: any; clientY: any }) => {
+            const { startX, startY, startLeft, startTop, startPos, lines } = dragState.current;
             let { clientX: moveX, clientY: moveY } = e;
 
-            // 计算鼠标拖动后，B block 最新的 left 和 top 值
-            let left = moveX - dragState.current.startX + dragState.current.startLeft;
-            let top = moveY - dragState.current.startY + dragState.current.startTop;
+            // 计算鼠标拖动后，被拖拽元素最新的 left 和 top 值
+            let left = moveX - startX + startLeft;
+            let top = moveY - startY + startTop;
             let x = null,
                 y = null;
 
-            // 将当前 B block 移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有 A block 存在，显示对应的辅助线
-            for (let i = 0; i < dragState.current.lines.x.length; i++) {
-                const { triggerLeft: l, lineLeft: s } = dragState.current.lines.x[i];
-                if (Math.abs(l - left) < 5) {
-                    // 接近 5 像素距离时显示辅助线
-                    x = s;
-                    // todo: 实现吸附效果
-                    // moveX = dragState.current.startX - dragState.current.startLeft + s;
+            // 将当前被拖拽移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有辅助线存在，显示对应的辅助线
+            for (let i = 0; i < lines.x.length; i++) {
+                const { triggerLeft, lineLeft } = lines.x[i];
+                // 接近 5 像素距离时显示辅助线
+                if (Math.abs(triggerLeft - left) < 5) {
+                    x = lineLeft;
                     break;
                 }
             }
-            for (let i = 0; i < dragState.current.lines.y.length; i++) {
-                const { triggerTop: t, lineTop: s } = dragState.current.lines.y[i];
-                if (Math.abs(t - top) < 5) {
-                    // 接近 5 像素距离时显示辅助线
-                    y = s;
-                    // todo: 实现吸附效果
-                    // moveY = dragState.current.startY - dragState.current.startTop + s;
+            for (let i = 0; i < lines.y.length; i++) {
+                const { triggerTop, lineTop } = lines.y[i];
+                // 接近 5 像素距离时显示辅助线
+                if (Math.abs(triggerTop - top) < 5) {
+                    y = lineTop;
                     break;
                 }
             }
 
             setMarkLine({ x, y });
 
-            const durX = moveX - dragState.current.startX;
-            const durY = moveY - dragState.current.startY;
+            const durX = moveX - startX;
+            const durY = moveY - startY;
 
             focusBlocks.forEach((block, index) => {
-                block.style.top = dragState.current.startPos[index].top + durY;
-                block.style.left = dragState.current.startPos[index].left + durX;
+                block.style.top = startPos[index].top + durY;
+                block.style.left = startPos[index].left + durX;
             });
 
             setCurrentSchema({ ...currentSchema });

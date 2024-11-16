@@ -1,11 +1,18 @@
 import { CSSProperties } from 'react';
 
+export enum ScaleMode {
+    // 四个角度缩放
+    SquaringScale,
+    // 横纵伸缩
+    HorizontalVerticalScale,
+}
+
 export interface IComponent {
     label: string;
     preview: () => JSX.Element | string;
     render: () => JSX.Element | string;
     type: string;
-    focusShape: 'scaleDot' | 'scaleLine';
+    scaleMode: ScaleMode;
     style?: CSSProperties;
     focus?: boolean;
     element?: HTMLElement;
@@ -36,7 +43,7 @@ registerConfig.register({
     preview: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>四个角度缩放</button>,
     render: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>四个角度缩放</button>,
     type: 'text',
-    focusShape: 'scaleDot',
+    scaleMode: ScaleMode.SquaringScale,
 });
 
 registerConfig.register({
@@ -44,7 +51,7 @@ registerConfig.register({
     preview: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>横纵伸缩</button>,
     render: () => <button style={{ display: 'inline-block', width: '100%', height: '100%' }}>横纵伸缩</button>,
     type: 'button',
-    focusShape: 'scaleLine',
+    scaleMode: ScaleMode.HorizontalVerticalScale,
 });
 
 registerConfig.register({
@@ -52,7 +59,7 @@ registerConfig.register({
     preview: () => <input placeholder="预览输入框" />,
     render: () => <input placeholder="渲染输入框" />,
     type: 'input',
-    focusShape: 'scaleLine',
+    scaleMode: ScaleMode.SquaringScale,
 });
 
 export default registerConfig;

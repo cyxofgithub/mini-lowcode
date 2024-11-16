@@ -76,7 +76,7 @@ let CanvasArea = (_props: IProps) => {
                 top: curTop,
                 zIndex: 1,
             },
-            focusShape: currentMaterial.focusShape,
+            scaleMode: currentMaterial.scaleMode,
         };
         // 3、将组件配置加入画布配置中
         currentSchema.blocks.push(config);

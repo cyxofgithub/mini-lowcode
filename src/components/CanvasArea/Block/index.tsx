@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import './index.css';
-import registerConfig from '../../MaterialPanel/registerConfig';
+import registerConfig, { ScaleMode } from '../../MaterialPanel/registerConfig';
 import React from 'react';
 import { GlobalContext, IBlock } from '../../../store';
 
 //私有常量
-const scaleDotPoints = ['lt', 'rt', 'lb', 'rb']; // 放大缩小
-const scaleLinePoints = ['l', 'r', 't', 'b']; // 横纵伸缩
+const scaleDotPoints = ['lt', 'rt', 'lb', 'rb']; // 四角缩放
+const scaleLinePoints = ['l', 'r', 't', 'b']; // 横竖缩放
 
 const cursorPoints = {
     lt: 'nw',
@@ -203,7 +203,7 @@ let Block = (_props: IProps) => {
             {RenderComponent}
             {block.focus ? (
                 <div className="block-focus-shape">
-                    {block.focusShape === 'scaleLine'
+                    {block.scaleMode === ScaleMode.HorizontalVerticalScale
                         ? scaleLinePoints.map(point => (
                               <span
                                   key={point}

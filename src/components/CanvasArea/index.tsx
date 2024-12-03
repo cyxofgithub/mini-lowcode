@@ -1,9 +1,10 @@
 import './index.css';
 import React, { useRef, useState } from 'react';
-import { GlobalContext, IBlock } from '../../store';
 import { Block } from './Block';
 import { getLinesPlaceInfo } from './utils';
-import { IAuxiliaryLine, IXAuxiliaryLine, IYAuxiliaryLine } from './declare';
+import { IAuxiliaryLine, IXAuxiliaryLine, IYAuxiliaryLine, TriggerGap } from './declare';
+import { IBlock } from './declare/block';
+import { globalStore } from '../../store';
 
 //私有常量
 
@@ -18,7 +19,7 @@ import { IAuxiliaryLine, IXAuxiliaryLine, IYAuxiliaryLine } from './declare';
 
 let CanvasArea = (_props: IProps) => {
     //变量声明、解构
-    const { currentMaterial, setCurrentMaterial, setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
+    const { currentMaterial, currentSchema, updateCurrentMaterial, updateCurrentSchema } = globalStore;
     const ref = useRef(null);
 
     // 记录当前选中拖动的 block 索引
@@ -82,14 +83,14 @@ let CanvasArea = (_props: IProps) => {
         // 3、将组件配置加入画布配置中
         currentSchema.blocks.push(config);
         // 4、更新画布配置
-        setCurrentSchema({ ...currentSchema });
+        updateCurrentSchema({ ...currentSchema });
         // 5、清空当前选中的物料组件
-        setCurrentMaterial(null);
+        updateCurrentMaterial(null);
     };
 
     const cleanBlocksFocus = (refresh?: boolean) => {
         currentSchema.blocks.forEach((block: IBlock) => (block.focus = false));
-        refresh && setCurrentSchema({ ...currentSchema });
+        refresh && updateCurrentSchema({ ...currentSchema });
     };
 
     const handleMouseDown = (e: any, index: number) => {
@@ -102,7 +103,7 @@ let CanvasArea = (_props: IProps) => {
 
         handleBlockMove(e);
 
-        setCurrentSchema({ ...currentSchema });
+        updateCurrentSchema({ ...currentSchema });
     };
 
     const blocksFocusInfo = () => {
@@ -161,8 +162,8 @@ let CanvasArea = (_props: IProps) => {
             // 将当前被拖拽移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有辅助线存在，显示对应的辅助线
             for (let i = 0; i < lines.x.length; i++) {
                 const { triggerLeft, lineLeft, lineTop, length } = lines.x[i] as IXAuxiliaryLine;
-                // 接近 5 像素距离时显示辅助线
-                if (Math.abs(triggerLeft - left) < 5) {
+                // 接近 TriggerGap 像素距离时显示辅助线
+                if (Math.abs(triggerLeft - left) < TriggerGap) {
                     x = {
                         lineTop,
                         lineLeft,
@@ -173,8 +174,8 @@ let CanvasArea = (_props: IProps) => {
             }
             for (let i = 0; i < lines.y.length; i++) {
                 const { triggerTop, lineLeft, lineTop, length } = lines.y[i] as IYAuxiliaryLine;
-                // 接近 5 像素距离时显示辅助线
-                if (Math.abs(triggerTop - top) < 5) {
+                // 接近 TriggerGap 像素距离时显示辅助线
+                if (Math.abs(triggerTop - top) < TriggerGap) {
                     y = {
                         lineLeft,
                         lineTop,
@@ -194,7 +195,7 @@ let CanvasArea = (_props: IProps) => {
                 block.style.left = startPos[index].left + durX;
             });
 
-            setCurrentSchema({ ...currentSchema });
+            updateCurrentSchema({ ...currentSchema });
         };
 
         const blockMouseUp = () => {

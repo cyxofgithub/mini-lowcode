@@ -1,5 +1,5 @@
-import { IBlock } from '../../../store';
 import { IAuxiliaryLines } from '../declare';
+import { IBlock } from '../declare/block';
 
 /**
  * 获取辅助线信息

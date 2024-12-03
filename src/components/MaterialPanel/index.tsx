@@ -1,7 +1,6 @@
+import { globalStore } from '../../store';
 import './index.css';
 import registerConfig, { IComponent } from './registerConfig';
-import { GlobalContext } from '../../store';
-import React from 'react';
 
 //私有常量
 
@@ -16,7 +15,7 @@ import React from 'react';
 
 let MaterialPanel = (_props: IProps) => {
     //变量声明、解构
-    const { setCurrentMaterial } = React.useContext(GlobalContext);
+    const { updateCurrentMaterial } = globalStore;
 
     //组件状态
 
@@ -34,7 +33,7 @@ let MaterialPanel = (_props: IProps) => {
             offsetY,
         };
         component.element = e?.target ?? null;
-        setCurrentMaterial(component);
+        updateCurrentMaterial(component);
     };
 
     //组件Effect

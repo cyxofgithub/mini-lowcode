@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import './index.css';
 import registerConfig, { ScaleMode } from '../../MaterialPanel/registerConfig';
 import React from 'react';
-import { GlobalContext, IBlock } from '../../../store';
+import { IBlock } from '../declare/block';
+import { globalStore } from '../../../store';
 
 //私有常量
 const scaleDotPoints = ['lt', 'rt', 'lb', 'rb']; // 四角缩放
@@ -29,9 +30,9 @@ const cursorPoints = {
 
 let Block = (_props: IProps) => {
     //变量声明、解构
+    const { currentSchema, updateCurrentSchema } = globalStore;
     const blockRef = useRef<any>();
     const { block, parentRef, onMouseDown } = _props;
-    const { setCurrentSchema, currentSchema } = React.useContext(GlobalContext);
     const blockStyle = {
         ...block.style,
     };
@@ -103,7 +104,7 @@ let Block = (_props: IProps) => {
                 // @ts-ignore
                 block.style.left = newLeft;
                 // 更新视图
-                setCurrentSchema({ ...currentSchema });
+                updateCurrentSchema({ ...currentSchema });
             }
         };
     };
@@ -163,7 +164,7 @@ let Block = (_props: IProps) => {
                 top: Math.min(top + height, top + (hasT ? durY : 0)), // 从上往下拖，不能超过 bottom，从下往上拖，top 不懂
             };
 
-            setCurrentSchema({ ...currentSchema });
+            updateCurrentSchema({ ...currentSchema });
         };
 
         const pointMouseUp = () => {

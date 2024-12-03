@@ -8,7 +8,7 @@ interface ISchema {
 
 const schema: ISchema = {
     container: {
-        width: 375, // iPhone 6/7/8 尺寸（具体按照设计稿尺寸）
+        width: 800, // iPhone 6/7/8 尺寸（具体按照设计稿尺寸）
         height: 667,
     },
     blocks: [

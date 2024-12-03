@@ -1,47 +1,29 @@
-import React from 'react';
+import { makeAutoObservable } from 'mobx';
 import { IComponent } from '../components/MaterialPanel/registerConfig';
+import { ISchema } from '../declare/schema';
 
-export type IBlock = Pick<IComponent, 'type' | 'focus'> & {
-    style: {
-        /**
-         * block 相对于 container 的左边距
-         */
-        left: number;
-        /**
-         * block 相对于 container 的上边距
-         */
-        top: number;
-        width?: number;
-        height?: number;
-        zIndex?: number;
-    };
-    focus: boolean;
-    scaleMode: IComponent['scaleMode'];
-};
-interface ISchema {
-    container: {
-        width: number;
-        height: number;
-    };
-    blocks: IBlock[];
-}
-interface IGlobalContext {
-    currentMaterial: IComponent | null;
-    setCurrentMaterial: React.Dispatch<React.SetStateAction<IComponent | null>>;
-    currentSchema: ISchema;
-    setCurrentSchema: React.Dispatch<React.SetStateAction<any>>;
-}
-const GlobalContext = React.createContext<IGlobalContext>({
-    currentMaterial: null,
-    setCurrentMaterial: () => {},
-    currentSchema: {
+class GlobalStore {
+    currentMaterial: IComponent | null = null;
+    currentSchema: ISchema = {
         container: {
             width: 0,
             height: 0,
         },
         blocks: [],
-    },
-    setCurrentSchema: () => {},
-});
+    };
 
-export { GlobalContext };
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    updateCurrentMaterial(material: IComponent | null) {
+        this.currentMaterial = material;
+    }
+
+    updateCurrentSchema(schema: ISchema) {
+        this.currentSchema = schema;
+    }
+}
+
+const globalStore = new GlobalStore();
+export { globalStore };

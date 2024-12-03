@@ -1,28 +1,23 @@
 import { makeAutoObservable } from 'mobx';
 import { IComponent } from '../components/MaterialPanel/registerConfig';
 import { ISchema } from '../declare/schema';
+import schema from '../schema';
 
 class GlobalStore {
     currentMaterial: IComponent | null = null;
-    currentSchema: ISchema = {
-        container: {
-            width: 0,
-            height: 0,
-        },
-        blocks: [],
-    };
+    currentSchema: ISchema = schema;
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    updateCurrentMaterial(material: IComponent | null) {
+    updateCurrentMaterial = (material: IComponent | null) => {
         this.currentMaterial = material;
-    }
+    };
 
-    updateCurrentSchema(schema: ISchema) {
+    updateCurrentSchema = (schema: ISchema) => {
         this.currentSchema = schema;
-    }
+    };
 }
 
 const globalStore = new GlobalStore();

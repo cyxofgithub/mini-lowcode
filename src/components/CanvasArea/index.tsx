@@ -5,6 +5,7 @@ import { getLinesPlaceInfo } from './utils';
 import { IAuxiliaryLine, IXAuxiliaryLine, IYAuxiliaryLine, TriggerGap } from './declare';
 import { IBlock } from './declare/block';
 import { globalStore } from '../../store';
+import { observer } from 'mobx-react-lite';
 
 //私有常量
 
@@ -250,5 +251,5 @@ let CanvasArea = (_props: IProps) => {
 interface IProps {}
 
 //prop-type定义，可选
-
+CanvasArea = observer(CanvasArea);
 export { CanvasArea };

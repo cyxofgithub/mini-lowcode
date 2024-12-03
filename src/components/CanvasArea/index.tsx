@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 import { GlobalContext, IBlock } from '../../store';
 import { Block } from './Block';
 import { getLinesPlaceInfo } from './utils';
+import { IAuxiliaryLine, IXAuxiliaryLine, IYAuxiliaryLine } from './declare';
 
 //私有常量
 
@@ -23,7 +24,7 @@ let CanvasArea = (_props: IProps) => {
     // 记录当前选中拖动的 block 索引
     const currentBlockIndex = useRef(-1);
     // 水平、垂直辅助线显示的位置
-    const [markLine, setMarkLine] = useState({ x: null, y: null });
+    const [markLine, setMarkLine] = useState<IAuxiliaryLine>({ x: null, y: null });
 
     const dragState = useRef<any>();
 
@@ -143,11 +144,12 @@ let CanvasArea = (_props: IProps) => {
             // 用于实现 block 在画布上的辅助线
             startLeft: fucusBlockLeft, // 当前选中 block 相对于 container 的左边距
             startTop: focusBlockTop,
-            lines: getLinesPlaceInfo(focusBlock, unFocusBlocks),
         };
 
         const blockMouseMove = (e: { clientX: any; clientY: any }) => {
-            const { startX, startY, startLeft, startTop, startPos, lines } = dragState.current;
+            const { startX, startY, startLeft, startTop, startPos } = dragState.current;
+            const lines = getLinesPlaceInfo(focusBlock, unFocusBlocks);
+
             let { clientX: moveX, clientY: moveY } = e;
 
             // 计算鼠标拖动后，被拖拽元素最新的 left 和 top 值
@@ -158,18 +160,26 @@ let CanvasArea = (_props: IProps) => {
 
             // 将当前被拖拽移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有辅助线存在，显示对应的辅助线
             for (let i = 0; i < lines.x.length; i++) {
-                const { triggerLeft, lineLeft } = lines.x[i];
+                const { triggerLeft, lineLeft, lineTop, length } = lines.x[i] as IXAuxiliaryLine;
                 // 接近 5 像素距离时显示辅助线
                 if (Math.abs(triggerLeft - left) < 5) {
-                    x = lineLeft;
+                    x = {
+                        lineTop,
+                        lineLeft,
+                        length,
+                    };
                     break;
                 }
             }
             for (let i = 0; i < lines.y.length; i++) {
-                const { triggerTop, lineTop } = lines.y[i];
+                const { triggerTop, lineLeft, lineTop, length } = lines.y[i] as IYAuxiliaryLine;
                 // 接近 5 像素距离时显示辅助线
                 if (Math.abs(triggerTop - top) < 5) {
-                    y = lineTop;
+                    y = {
+                        lineLeft,
+                        lineTop,
+                        length,
+                    };
                     break;
                 }
             }
@@ -219,8 +229,18 @@ let CanvasArea = (_props: IProps) => {
             {currentSchema.blocks.map((block: IBlock, index: number) => (
                 <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, index)} parentRef={ref} />
             ))}
-            {markLine.x !== null && <div className="editor-line-x" style={{ left: markLine.x }}></div>}
-            {markLine.y !== null && <div className="editor-line-y" style={{ top: markLine.y }}></div>}
+            {markLine.x !== null && (
+                <div
+                    className="editor-line-x"
+                    style={{ top: markLine.x.lineTop, left: markLine.x.lineLeft, height: markLine.x.length }}
+                ></div>
+            )}
+            {markLine.y !== null && (
+                <div
+                    className="editor-line-y"
+                    style={{ top: markLine.y.lineTop, left: markLine.y.lineLeft, width: markLine.y.length }}
+                ></div>
+            )}
         </div>
     );
 };

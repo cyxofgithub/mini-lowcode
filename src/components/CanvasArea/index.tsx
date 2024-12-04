@@ -1,8 +1,8 @@
 import './index.css';
 import React, { useRef, useState } from 'react';
 import { Block } from './Block';
-import { getLinesPlaceInfo } from './utils';
-import { IAuxiliaryLine, IXAuxiliaryLine, IYAuxiliaryLine, TriggerGap } from './declare';
+import { getLineInfo, getLinesPlaceInfo } from './utils';
+import { IAuxiliaryLineInfos, IXAuxiliaryLineTriggerInfo, IYAuxiliaryLineTriggerInfo, TriggerGap } from './declare';
 import { IBlock } from './declare/block';
 import { globalStore } from '../../store';
 import { observer } from 'mobx-react-lite';
@@ -26,7 +26,7 @@ let CanvasArea = (_props: IProps) => {
     // 记录当前选中拖动的 block 索引
     const currentBlockIndex = useRef(-1);
     // 水平、垂直辅助线显示的位置
-    const [markLine, setMarkLine] = useState<IAuxiliaryLine>({ x: null, y: null });
+    const [markLine, setMarkLine] = useState<IAuxiliaryLineInfos>({ x: null, y: null });
 
     const dragState = useRef<any>();
 
@@ -147,10 +147,10 @@ let CanvasArea = (_props: IProps) => {
             startLeft: fucusBlockLeft, // 当前选中 block 相对于 container 的左边距
             startTop: focusBlockTop,
         };
+        const lines = getLinesPlaceInfo(focusBlock, unFocusBlocks);
 
         const blockMouseMove = (e: { clientX: any; clientY: any }) => {
             const { startX, startY, startLeft, startTop, startPos } = dragState.current;
-            const lines = getLinesPlaceInfo(focusBlock, unFocusBlocks);
 
             let { clientX: moveX, clientY: moveY } = e;
 
@@ -162,26 +162,28 @@ let CanvasArea = (_props: IProps) => {
 
             // 将当前被拖拽移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有辅助线存在，显示对应的辅助线
             for (let i = 0; i < lines.x.length; i++) {
-                const { triggerLeft, lineLeft, lineTop, length } = lines.x[i] as IXAuxiliaryLine;
+                const { triggerLeft, triggerBlock, triggerCondition } = lines.x[i] as IXAuxiliaryLineTriggerInfo;
                 // 接近 TriggerGap 像素距离时显示辅助线
                 if (Math.abs(triggerLeft - left) < TriggerGap) {
-                    x = {
-                        lineTop,
-                        lineLeft,
-                        length,
-                    };
+                    const lineInfo = getLineInfo({
+                        focusBlock,
+                        unFocusBlock: triggerBlock,
+                        triggerCondition,
+                    });
+                    x = lineInfo;
                     break;
                 }
             }
             for (let i = 0; i < lines.y.length; i++) {
-                const { triggerTop, lineLeft, lineTop, length } = lines.y[i] as IYAuxiliaryLine;
+                const { triggerTop, triggerBlock, triggerCondition } = lines.y[i] as IYAuxiliaryLineTriggerInfo;
                 // 接近 TriggerGap 像素距离时显示辅助线
                 if (Math.abs(triggerTop - top) < TriggerGap) {
-                    y = {
-                        lineLeft,
-                        lineTop,
-                        length,
-                    };
+                    const lineInfo = getLineInfo({
+                        focusBlock,
+                        unFocusBlock: triggerBlock,
+                        triggerCondition,
+                    });
+                    y = lineInfo;
                     break;
                 }
             }

@@ -235,13 +235,17 @@ let CanvasArea = (_props: IProps) => {
                 <div
                     className="editor-line-x"
                     style={{ top: markLine.x.lineTop, left: markLine.x.lineLeft, height: markLine.x.length }}
-                ></div>
+                >
+                    <div className="editor-line-font">{markLine.x.length}px</div>
+                </div>
             )}
             {markLine.y !== null && (
                 <div
                     className="editor-line-y"
                     style={{ top: markLine.y.lineTop, left: markLine.y.lineLeft, width: markLine.y.length }}
-                ></div>
+                >
+                    <div className="editor-line-font">{markLine.y.length}px</div>
+                </div>
             )}
         </div>
     );

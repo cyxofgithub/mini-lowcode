@@ -37,4 +37,4 @@ export interface IAuxiliaryLine {
     y: IAuxiliaryLineBaseInfo | null;
 }
 
-export const TriggerGap = 10;
+export const TriggerGap = 8;

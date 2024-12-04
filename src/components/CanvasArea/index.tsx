@@ -231,7 +231,7 @@ let CanvasArea = (_props: IProps) => {
             {currentSchema.blocks.map((block: IBlock, index: number) => (
                 <Block key={index} block={block} onMouseDown={e => handleMouseDown(e, index)} parentRef={ref} />
             ))}
-            {markLine.x !== null && (
+            {markLine.x !== null && markLine.x?.length > 0 && (
                 <div
                     className="editor-line-x"
                     style={{ top: markLine.x.lineTop, left: markLine.x.lineLeft, height: markLine.x.length }}
@@ -239,7 +239,7 @@ let CanvasArea = (_props: IProps) => {
                     <div className="editor-line-font">{markLine.x.length}px</div>
                 </div>
             )}
-            {markLine.y !== null && (
+            {markLine.y !== null && markLine.y?.length > 0 && (
                 <div
                     className="editor-line-y"
                     style={{ top: markLine.y.lineTop, left: markLine.y.lineLeft, width: markLine.y.length }}

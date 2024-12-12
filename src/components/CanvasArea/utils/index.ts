@@ -1,4 +1,3 @@
-import { globalStore } from '../../../store';
 import {
     IAuxiliaryLineInfo,
     IAuxiliaryLineTriggerInfos,
@@ -15,7 +14,7 @@ export const getLinesPlaceInfo = (focusBlock: IBlock, unFocusBlocks: IBlock[]) =
     const lines: IAuxiliaryLineTriggerInfos = { x: [], y: [] };
 
     // 收集拖拽模块移动到其他模块周围时，要显示的 10 条辅助信息
-    const { width: focusBlockWidth = 0, height: focusBlockHeight = 0 } = focusBlock.style;
+    const { width: focusBlockWidth = 0, height: focusBlockHeight = 0, left: focusBlockLeft } = focusBlock.style;
 
     unFocusBlocks.forEach(block => {
         const {
@@ -25,36 +24,77 @@ export const getLinesPlaceInfo = (focusBlock: IBlock, unFocusBlocks: IBlock[]) =
             height: unFocusedBlockHeight = 0,
         } = block.style;
 
+        // 未聚焦元素包裹聚焦元素的情况
+        // 垂直纵线显示的 3 种情况：（A代表未聚焦元素， B代表聚焦元素）
+        // 情况一：中对中
+        lines.x.push({
+            triggerLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2 - focusBlockWidth / 2,
+            triggerBlock: block,
+            triggerCondition: XLineTriggerCondition.XC2CIn,
+        });
+        // 情况二：中对左
+        lines.x.push({
+            triggerLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2,
+            triggerBlock: block,
+            triggerCondition: XLineTriggerCondition.XC2LIn,
+        });
+        // 情况三：中对右
+        lines.x.push({
+            triggerLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2 - focusBlockWidth,
+            triggerBlock: block,
+            triggerCondition: XLineTriggerCondition.XC2RIn,
+        });
+
+        // 水平横线显示的 3 种情况：（A代表未聚焦元素， B代表聚焦元素）
+        // 情况一：中对中
+        lines.y.push({
+            triggerTop: unFocusedBlockTop + unFocusedBlockHeight / 2 - focusBlockHeight / 2,
+            triggerBlock: block,
+            triggerCondition: YLineTriggerCondition.YC2CIn,
+        });
+        // 情况二：中对上
+        lines.y.push({
+            triggerTop: unFocusedBlockTop + unFocusedBlockHeight / 2,
+            triggerBlock: block,
+            triggerCondition: YLineTriggerCondition.YC2CIn,
+        });
+        // 情况三：中对下
+        lines.y.push({
+            triggerTop: unFocusedBlockTop + unFocusedBlockHeight / 2 - focusBlockHeight,
+            triggerBlock: block,
+            triggerCondition: YLineTriggerCondition.YC2CIn,
+        });
+
         // 垂直纵线显示的 5 种情况：（A代表未聚焦元素， B代表聚焦元素）
         // 情况一：左对左，线条展示在 A 的左边
         lines.x.push({
             triggerLeft: unFocusedBlockLeft,
             triggerBlock: block,
-            triggerCondition: XLineTriggerCondition.L2L,
+            triggerCondition: XLineTriggerCondition.XL2L,
         });
         // 情况二：左对右，线条显示在 A 的左边
         lines.x.push({
             triggerLeft: unFocusedBlockLeft - focusBlockWidth,
             triggerBlock: block,
-            triggerCondition: XLineTriggerCondition.L2R,
+            triggerCondition: XLineTriggerCondition.XL2R,
         });
         // 情况三：右对左，线条显示在 A 的右边
         lines.x.push({
             triggerLeft: unFocusedBlockLeft + unFocusedBlockWidth,
             triggerBlock: block,
-            triggerCondition: XLineTriggerCondition.R2L,
+            triggerCondition: XLineTriggerCondition.XR2L,
         });
         // 情况四：右对右，线条显示在 A 的右边
         lines.x.push({
             triggerLeft: unFocusedBlockLeft + unFocusedBlockWidth - focusBlockWidth,
             triggerBlock: block,
-            triggerCondition: XLineTriggerCondition.R2R,
+            triggerCondition: XLineTriggerCondition.XR2R,
         });
         // 情况五：中对中，线条显示在 A 的中间
         lines.x.push({
             triggerLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2 - focusBlockWidth / 2,
             triggerBlock: block,
-            triggerCondition: XLineTriggerCondition.C2C,
+            triggerCondition: XLineTriggerCondition.XC2C,
         });
 
         // 水平横线显示的 5 种情况：（A代表未聚焦元素， B代表聚焦元素）
@@ -62,31 +102,31 @@ export const getLinesPlaceInfo = (focusBlock: IBlock, unFocusBlocks: IBlock[]) =
         lines.y.push({
             triggerTop: unFocusedBlockTop,
             triggerBlock: block,
-            triggerCondition: YLineTriggerCondition.T2T,
+            triggerCondition: YLineTriggerCondition.YT2T,
         });
         // 情况二：A 和 B 顶对底，线条显示在 A 的上边
         lines.y.push({
             triggerTop: unFocusedBlockTop - focusBlockHeight,
             triggerBlock: block,
-            triggerCondition: YLineTriggerCondition.T2B,
+            triggerCondition: YLineTriggerCondition.YT2B,
         });
         // 情况三：A 和 B 底对顶， 线条显示在 A 的下边
         lines.y.push({
             triggerTop: unFocusedBlockTop + unFocusedBlockHeight,
             triggerBlock: block,
-            triggerCondition: YLineTriggerCondition.B2T,
+            triggerCondition: YLineTriggerCondition.YB2T,
         });
         // 情况四：A 和 B 底对底， 线条显示在 A 的下边
         lines.y.push({
             triggerTop: unFocusedBlockTop + unFocusedBlockHeight - focusBlockHeight,
             triggerBlock: block,
-            triggerCondition: YLineTriggerCondition.B2B,
+            triggerCondition: YLineTriggerCondition.YB2B,
         });
         // 情况五：A 和 B 中对中， 线条显示在 A 的中间
         lines.y.push({
             triggerTop: unFocusedBlockTop + unFocusedBlockHeight / 2 - focusBlockHeight / 2,
             triggerBlock: block,
-            triggerCondition: YLineTriggerCondition.C2C,
+            triggerCondition: YLineTriggerCondition.YC2C,
         });
     });
 
@@ -128,47 +168,85 @@ export const getLineInfo: (params: {
     const yLineLength =
         unFocusedBlockLeft > focusBlockLeft ? unFocusedBlockLeft - yLineLeft : focusBlockLeft - yLineLeft;
 
-    const container = globalStore.currentSchema.container;
-    const isFilledContainerBlock = container.width === unFocusedBlockWidth && container.height === unFocusedBlockHeight;
-
-    // 容器也是一个 block，用于实现对其容器边界时的辅助线
-    const xLength = isFilledContainerBlock ? container.height : xLineLength;
-    const xTop = isFilledContainerBlock ? 0 : xLineTop;
-    const yLength = isFilledContainerBlock ? container.width : yLineLength;
-    const yLeft = isFilledContainerBlock ? 0 : yLineLeft;
+    const xLength = xLineLength;
+    const xTop = xLineTop;
+    const yLength = yLineLength;
+    const yLeft = yLineLeft;
 
     switch (triggerCondition) {
+        // 未聚焦元素包裹聚焦元素的情况
+        // 垂直纵线显示的 3 种情况：（A代表未聚焦元素， B代表聚焦元素）
+        // 中对中、中对左、中对右
+        case XLineTriggerCondition.XC2CIn:
+            return {
+                lineLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2,
+                lineTop: unFocusedBlockTop,
+                length: unFocusedBlockHeight,
+            };
+        case XLineTriggerCondition.XC2LIn:
+            return {
+                lineLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2,
+                lineTop: unFocusedBlockTop,
+                length: unFocusedBlockHeight,
+            };
+        case XLineTriggerCondition.XC2RIn:
+            return {
+                lineLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2,
+                lineTop: unFocusedBlockTop,
+                length: unFocusedBlockHeight,
+            };
+        // 水平横线显示的 3 种情况：（A代表未聚焦元素， B代表聚焦元素）
+        // 中对中、中对上、中对下
+        case YLineTriggerCondition.YC2CIn:
+            return {
+                lineLeft: unFocusedBlockLeft,
+                lineTop: unFocusedBlockTop + unFocusedBlockHeight / 2,
+                length: unFocusedBlockWidth,
+            };
+        case YLineTriggerCondition.YC2TIn:
+            return {
+                lineLeft: unFocusedBlockLeft,
+                lineTop: unFocusedBlockTop + unFocusedBlockHeight / 2,
+                length: unFocusedBlockWidth,
+            };
+        case YLineTriggerCondition.YC2BIn:
+            return {
+                lineLeft: 0,
+                lineTop: unFocusedBlockTop + unFocusedBlockHeight / 2,
+                length: unFocusedBlockWidth,
+            };
+
         // 垂直纵线显示的 5 种情况：（A代表未聚焦元素， B代表聚焦元素）
         // 情况一：左对左，线条展示在 A 的左边
-        case XLineTriggerCondition.L2L:
+        case XLineTriggerCondition.XL2L:
             return {
                 lineLeft: unFocusedBlockLeft,
                 lineTop: xTop,
                 length: xLength,
             };
         // 情况二：左对右，线条显示在 A 的左边
-        case XLineTriggerCondition.L2R:
+        case XLineTriggerCondition.XL2R:
             return {
                 lineLeft: unFocusedBlockLeft,
                 lineTop: xTop,
                 length: xLength,
             };
         // 情况三：右对左，线条显示在 A 的右边
-        case XLineTriggerCondition.R2L:
+        case XLineTriggerCondition.XR2L:
             return {
                 lineLeft: unFocusedBlockLeft + unFocusedBlockWidth,
                 lineTop: xTop,
                 length: xLength,
             };
         // 情况四：右对右，线条显示在 A 的右边
-        case XLineTriggerCondition.R2R:
+        case XLineTriggerCondition.XR2R:
             return {
                 lineLeft: unFocusedBlockLeft + unFocusedBlockWidth,
                 lineTop: xTop,
                 length: xLength,
             };
         // 情况五：中对中，线条显示在 A 的中间
-        case XLineTriggerCondition.C2C:
+        case XLineTriggerCondition.XC2C:
             return {
                 lineLeft: unFocusedBlockLeft + unFocusedBlockWidth / 2,
                 lineTop: xTop,
@@ -177,35 +255,35 @@ export const getLineInfo: (params: {
 
         // 水平横线显示的 5 种情况：（A代表未聚焦元素， B代表聚焦元素）
         // 情况一：A 和 B 顶和顶对，线条显示在 A 的上边
-        case YLineTriggerCondition.T2T:
+        case YLineTriggerCondition.YT2T:
             return {
                 lineLeft: yLeft,
                 lineTop: unFocusedBlockTop,
                 length: yLength,
             };
         // 情况二：A 和 B 顶对底，线条显示在 A 的上边
-        case YLineTriggerCondition.T2B:
+        case YLineTriggerCondition.YT2B:
             return {
                 lineLeft: yLeft,
                 lineTop: unFocusedBlockTop,
                 length: yLength,
             };
         // 情况三：A 和 B 底对顶， 线条显示在 A 的下边
-        case YLineTriggerCondition.B2T:
+        case YLineTriggerCondition.YB2T:
             return {
                 lineLeft: yLeft,
                 lineTop: unFocusedBlockTop + unFocusedBlockHeight,
                 length: yLength,
             };
         // 情况四：A 和 B 底对底， 线条显示在 A 的下边
-        case YLineTriggerCondition.B2B:
+        case YLineTriggerCondition.YB2B:
             return {
                 lineLeft: yLeft,
                 lineTop: unFocusedBlockTop + unFocusedBlockHeight,
                 length: yLength,
             };
         // 情况五：A 和 B 中对中， 线条显示在 A 的中间
-        case YLineTriggerCondition.C2C:
+        case YLineTriggerCondition.YC2C:
             return {
                 lineLeft: yLeft,
                 lineTop: unFocusedBlockTop + unFocusedBlockHeight / 2,

@@ -10,6 +10,12 @@ import { observer } from 'mobx-react-lite';
 //私有常量
 
 //可抽离的逻辑处理函数/组件
+const isAIncludesB = (a: IBlock, b: IBlock) => {
+    const { left: aLeft, top: aTop, width: aWidth = 0, height: aHeight = 0 } = a.style;
+    const { left: bLeft, top: bTop, width: bWidth = 0, height: bHeight = 0 } = b.style;
+
+    return aLeft <= bLeft && aTop <= bTop && aLeft + aWidth >= bLeft + bWidth && aTop + aHeight >= bTop + bHeight;
+};
 
 /**
  * 【组件功能】
@@ -136,7 +142,7 @@ let CanvasArea = (_props: IProps) => {
         const { focusBlocks, unFocusBlocks } = blocksFocusInfo();
         const focusBlock = focusBlocks[0];
 
-        const { left: fucusBlockLeft, top: focusBlockTop } = focusBlock.style;
+        const { left: focusBlockLeft, top: focusBlockTop } = focusBlock.style;
 
         dragState.current = {
             startX: e.clientX, // 鼠标按下时的位置相对于浏览器视口的x坐标
@@ -144,7 +150,7 @@ let CanvasArea = (_props: IProps) => {
             startPos: focusBlocks.map(({ style }) => ({ top: style.top, left: style.left })), // 拖拽前 block 的位置信息
 
             // 用于实现 block 在画布上的辅助线
-            startLeft: fucusBlockLeft, // 当前选中 block 相对于 container 的左边距
+            startLeft: focusBlockLeft, // 当前选中 block 相对于 container 的左边距
             startTop: focusBlockTop,
         };
         const lines = getLinesPlaceInfo(focusBlock, unFocusBlocks);
@@ -163,8 +169,11 @@ let CanvasArea = (_props: IProps) => {
             // 将当前被拖拽移动的位置，和上面记录的 lines 进行一一比较，如果移动到的范围内有辅助线存在，显示对应的辅助线
             for (let i = 0; i < lines.x.length; i++) {
                 const { triggerLeft, triggerBlock, triggerCondition } = lines.x[i] as IXAuxiliaryLineTriggerInfo;
+
                 // 接近 TriggerGap 像素距离时显示辅助线
                 if (Math.abs(triggerLeft - left) < TriggerGap) {
+                    if (triggerCondition.includes('In') && !isAIncludesB(triggerBlock, focusBlock)) continue;
+
                     const lineInfo = getLineInfo({
                         focusBlock,
                         unFocusBlock: triggerBlock,
@@ -178,6 +187,8 @@ let CanvasArea = (_props: IProps) => {
                 const { triggerTop, triggerBlock, triggerCondition } = lines.y[i] as IYAuxiliaryLineTriggerInfo;
                 // 接近 TriggerGap 像素距离时显示辅助线
                 if (Math.abs(triggerTop - top) < TriggerGap) {
+                    if (triggerCondition.includes('In') && !isAIncludesB(triggerBlock, focusBlock)) continue;
+
                     const lineInfo = getLineInfo({
                         focusBlock,
                         unFocusBlock: triggerBlock,

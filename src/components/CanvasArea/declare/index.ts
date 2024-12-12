@@ -4,46 +4,78 @@ export enum XLineTriggerCondition {
     /**
      * 左对左
      */
-    L2L = 'L2L',
+    XL2L = 'XL2L',
     /**
      * 左对右
      */
-    L2R = 'L2R',
+    XL2R = 'XL2R',
     /**
      * 右对左
      */
-    R2L = 'R2L',
+    XR2L = 'XR2L',
     /**
      * 右对右
      */
-    R2R = 'R2R',
+    XR2R = 'XR2R',
     /**
      * 中对中
      */
-    C2C = 'C2C',
+    XC2C = 'XC2C',
+
+    /**
+     * 一个容器包裹另一个容器的情况
+     * 中对中
+     */
+    XC2CIn = 'XC2CIn',
+    /**
+     * 一个容器包裹另一个容器的情况
+     * 中对左
+     */
+    XC2LIn = 'XC2LIn',
+    /**
+     * 一个容器包裹另一个容器的情况
+     * 中对右
+     */
+    XC2RIn = 'XC2RIn',
 }
 
 export enum YLineTriggerCondition {
     /**
      * 上对上
      */
-    T2T = 'T2T',
+    YT2T = 'YT2T',
     /**
      * 上对下
      */
-    T2B = 'T2B',
+    YT2B = 'YT2B',
     /**
      * 下对上
      */
-    B2T = 'B2T',
+    YB2T = 'YB2T',
     /**
      * 下对下
      */
-    B2B = 'B2B',
+    YB2B = 'YB2B',
     /**
      * 中对中
      */
-    C2C = 'C2C',
+    YC2C = 'YC2C',
+
+    /**
+     * 一个容器包裹另一个容器的情况
+     * 中对中
+     */
+    YC2CIn = 'YC2CIn',
+    /**
+     * 一个容器包裹另一个容器的情况
+     * 中对上
+     */
+    YC2TIn = 'YC2TIn',
+    /**
+     * 一个容器包裹另一个容器的情况
+     * 中对下
+     */
+    YC2BIn = 'YC2BIn',
 }
 export interface IAuxiliaryLineInfo {
     /**
@@ -100,4 +132,4 @@ export interface IAuxiliaryLineTriggerInfos {
     y: IYAuxiliaryLineTriggerInfo[];
 }
 
-export const TriggerGap = 8;
+export const TriggerGap = 5;
